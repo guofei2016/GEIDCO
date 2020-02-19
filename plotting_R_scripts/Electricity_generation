@@ -1,0 +1,189 @@
+##----------------------------------------------------------------------------------------------
+## loading required packages
+
+library(data.table)
+library(ggplot2)
+library(openxlsx)
+library(reshape2)
+library(dplyr)
+library(tidyr)
+
+##-----------------------------------------------------------------------------------------
+setwd("C:/Users/guof/Desktop/GEIDCO_paper_writing/modeling_results/reporting_excel_files")
+
+##--------------------------------------------------------------------------------------------------
+# reading in the required data 
+
+# scen_list <- c( "GEI_noint_lc_15","GEI_int_lc_15","GEI_flex_lc_15","GEI_openres_lc_15",
+#                 "GEI_noint_mc_15","GEI_int_mc_15","GEI_flex_mc_15","GEI_openres_mc_15",
+#                 "GEI_noint_hc_15","GEI_int_hc_15","GEI_flex_hc_15","GEI_openres_hc_15",
+#                 "GEI_noint_lc_50","GEI_int_lc_50","GEI_flex_lc_50","GEI_openres_lc_50",
+#                 "GEI_noint_mc_50","GEI_int_mc_50","GEI_flex_mc_50","GEI_openres_mc_50",
+#                 "GEI_noint_hc_50","GEI_int_hc_50","GEI_flex_hc_50","GEI_openres_hc_50")
+
+
+# scen_list <- c( "GEI_noint_lc_15","GEI_int_lc_15","GEI_openres_lc_15",
+#                 "GEI_noint_mc_15","GEI_int_mc_15","GEI_openres_mc_15",
+#                 "GEI_noint_hc_15","GEI_int_hc_15","GEI_openres_hc_15",
+#                 "GEI_noint_lc_50","GEI_int_lc_50","GEI_openres_lc_50",
+#                 "GEI_noint_mc_50","GEI_int_mc_50","GEI_openres_mc_50",
+#                 "GEI_noint_hc_50","GEI_int_hc_50","GEI_openres_hc_50")
+
+scen_list <- c( "SSP2_noint_lc_15","SSP2_int_lc_15","SSP2_openres_lc_15",
+                "SSP2_noint_mc_15","SSP2_int_mc_15","SSP2_openres_mc_15",
+                "SSP2_noint_hc_15","SSP2_int_hc_15","SSP2_openres_hc_15",
+                "SSP2_noint_lc_50","SSP2_int_lc_50","SSP2_openres_lc_50",
+                "SSP2_noint_mc_50","SSP2_int_mc_50","SSP2_openres_mc_50",
+                "SSP2_noint_hc_50","SSP2_int_hc_50","SSP2_openres_hc_50")
+
+# scen_list <- c( "SSP1-SSP2_noint_lc_15","SSP1-SSP2_int_lc_15","SSP1-SSP2_openres_lc_15",
+#                 "SSP1-SSP2_noint_mc_15","SSP1-SSP2_int_mc_15","SSP1-SSP2_openres_mc_15",
+#                 "SSP1-SSP2_noint_hc_15","SSP1-SSP2_int_hc_15","SSP1-SSP2_openres_hc_15",
+#                 "SSP1-SSP2_noint_lc_50","SSP1-SSP2_int_lc_50","SSP1-SSP2_openres_lc_50",
+#                 "SSP1-SSP2_noint_mc_50","SSP1-SSP2_int_mc_50","SSP1-SSP2_openres_mc_50",
+#                 "SSP1-SSP2_noint_hc_50","SSP1-SSP2_int_hc_50","SSP1-SSP2_openres_hc_50")
+# 
+# scen_list <- c( "SSP3-SSP2_noint_lc_15","SSP3-SSP2_int_lc_15","SSP3-SSP2_openres_lc_15",
+#                 "SSP3-SSP2_noint_mc_15","SSP3-SSP2_int_mc_15","SSP3-SSP2_openres_mc_15",
+#                 "SSP3-SSP2_noint_hc_15","SSP3-SSP2_int_hc_15","SSP3-SSP2_openres_hc_15",
+#                 "SSP3-SSP2_noint_lc_50","SSP3-SSP2_int_lc_50","SSP3-SSP2_openres_lc_50",
+#                 "SSP3-SSP2_noint_mc_50","SSP3-SSP2_int_mc_50","SSP3-SSP2_openres_mc_50",
+#                 "SSP3-SSP2_noint_hc_50","SSP3-SSP2_int_hc_50","SSP3-SSP2_openres_hc_50")
+
+
+# reading in to data.frames of "secondary electricty"
+for (scen in scen_list){
+  data <- read.xlsx(paste("MESSAGEix-GLOBIOM_GEIDCO2_",scen, "_merged.xlsx", sep=""), sheet = "secondary_elec")
+  names(data) <- c("MODEL", "SCENARIO", "REGION", "VARIABLE", "UNIT", "2000", "2005", "2010", "2020", "2030", "2040", "2050", "2060", "2070", "2080", "2090", "2100", "2110")
+  assign (paste(scen, "_S_elec", sep=""), data)
+}
+
+##------------------------------------------------------------------------------------------
+
+##------------------------------------------------------------------------------------------
+tech_list <- c("Secondary Energy|Electricity|Biomass",
+               "Secondary Energy|Electricity|Coal",
+               "Secondary Energy|Electricity|Gas",
+               "Secondary Energy|Electricity|Oil",
+               "Secondary Energy|Electricity|Geothermal",
+               "Secondary Energy|Electricity|Hydro",
+               "Secondary Energy|Electricity|Nuclear",
+               "Secondary Energy|Electricity|Solar",
+               "Secondary Energy|Electricity|Other",
+               "Secondary Energy|Electricity|Storage Losses",
+               "Secondary Energy|Electricity|Transmission Losses",
+               "Secondary Energy|Electricity|Wind")
+##------------------------------------------------------------------------------------------
+
+
+##------------------------------------------------------------------------------------
+## plotting power generation mix comparasion figure for the SSP2 demand group scenarios (as an example) 
+##------------------------------------------------------------------------------------
+S_elec <-  bind_rows(SSP2_noint_lc_15_S_elec,SSP2_int_lc_15_S_elec,SSP2_openres_lc_15_S_elec,
+                     SSP2_noint_mc_15_S_elec,SSP2_int_mc_15_S_elec,SSP2_openres_mc_15_S_elec,
+                     SSP2_noint_hc_15_S_elec,SSP2_int_hc_15_S_elec,SSP2_openres_hc_15_S_elec,
+                     SSP2_noint_lc_50_S_elec,SSP2_int_lc_50_S_elec,SSP2_openres_lc_50_S_elec,
+                     SSP2_noint_mc_50_S_elec,SSP2_int_mc_50_S_elec,SSP2_openres_mc_50_S_elec,
+                     SSP2_noint_hc_50_S_elec,SSP2_int_hc_50_S_elec,SSP2_openres_hc_50_S_elec)
+
+rm(SSP2_noint_lc_15_S_elec,SSP2_int_lc_15_S_elec,SSP2_openres_lc_15_S_elec,
+   SSP2_noint_mc_15_S_elec,SSP2_int_mc_15_S_elec,SSP2_openres_mc_15_S_elec,
+   SSP2_noint_hc_15_S_elec,SSP2_int_hc_15_S_elec,SSP2_openres_hc_15_S_elec,
+   SSP2_noint_lc_50_S_elec,SSP2_int_lc_50_S_elec,SSP2_openres_lc_50_S_elec,
+   SSP2_noint_mc_50_S_elec,SSP2_int_mc_50_S_elec,SSP2_openres_mc_50_S_elec,
+   SSP2_noint_hc_50_S_elec,SSP2_int_hc_50_S_elec,SSP2_openres_hc_50_S_elec)
+
+S_elec_SSP2 <- S_elec # data backup
+##------------------------------------------------------------------------------------------
+
+
+##---------------------------------------------------------------------------
+## data orgnization for plotting figures  
+
+S_elec <- melt(S_elec,id.vars = 1:5)
+
+S_elec_vv <- subset(S_elec,VARIABLE%in%tech_list)
+
+names (S_elec_vv)[6] <- "Year" # change the colum name
+
+S_elec_vv$VARIABLE <- substring( S_elec_vv$VARIABLE, 30 ) # start from 30 in order to remove "Secondary Energy|Electricity|"
+
+S_elec_vv$SCENARIO <- substring( S_elec_vv$SCENARIO, 6 ) # start from 5 in order to remove "SSP2_"
+
+S_elec_vv$value <- S_elec_vv$value*0.27777778  # converting unit from "EJ/yr" to "PWh/yr" 
+
+S_elec_vv$UNIT <- "PWh/yr"
+
+# check the value of the category "Other" to see if they are all zero
+
+Other_check_min <- min(filter(S_elec_vv, VARIABLE=="Other")$value)
+Other_check_max <- max(filter(S_elec_vv, VARIABLE=="Other")$value)
+
+# if zero for the category of "Other", the delete it from the dataset
+S_elec_vv <- filter(S_elec_vv, VARIABLE!="Other")
+
+
+#-----------------------
+
+S_elec_vv$value <- ifelse(S_elec_vv$VARIABLE=="Storage Losses",-S_elec_vv$value,S_elec_vv$value)
+S_elec_vv$value <- ifelse(S_elec_vv$VARIABLE=="Transmission Losses",-S_elec_vv$value,S_elec_vv$value)
+
+S_elec_vv$VARIABLE <- factor(S_elec_vv$VARIABLE, levels = c("Coal", "Oil", "Gas", "Biomass", "Geothermal",
+                                                            "Nuclear", "Hydro", "Solar", "Wind",
+                                                            "Storage Losses","Transmission Losses"))
+S_elec_vv$VARIABLE <- droplevels(S_elec_vv$VARIABLE)
+
+
+COLSE <- c( "black", "brown", "light blue", "dark green", "orange", 
+            "blue", "purple", "yellow", "pink", 
+            "grey", "light grey") # set up color scheme
+
+
+time_list <- c(2050, 2070, 2100)
+
+ss <- c("SSP2")
+
+for( yy in time_list ){
+  for( rr in unique(S_elec_vv$REGION)){
+    
+    S_elec_rr <- subset(S_elec_vv,REGION==rr & Year==yy)
+    S_elec_rr <- subset( S_elec_rr, !is.na( value ) ) # remove all rows with NA in the colume of value
+    
+    S_elec_rr$SCENARIO <- factor(S_elec_rr$SCENARIO, levels=c("noint_lc_15","int_lc_15","openres_lc_15",
+                                                              "noint_mc_15","int_mc_15","openres_mc_15",
+                                                              "noint_hc_15","int_hc_15","openres_hc_15",
+                                                              "noint_lc_50","int_lc_50","openres_lc_50",
+                                                              "noint_mc_50","int_mc_50","openres_mc_50",
+                                                              "noint_hc_50","int_hc_50","openres_hc_50"))
+    
+    
+    Title <- paste0(rr, " Electricity Generation in ", yy, " (", ss, " demand", ")")
+    
+    if( nrow( S_elec_rr ) ){
+      # NOTE THAT Y-AXIS LIMIT IS SET EXOGENOUSLY TO MAX 2100 VALUE
+      p <- ggplot()
+      p <- p + geom_bar(data = S_elec_rr, aes(x=SCENARIO, y=value, fill = VARIABLE), stat="identity") 
+      
+      p <- p + labs(fill = NULL) # removing the legend title
+      
+      
+      p <- p + xlab("scenario") + ylab("PWh/yr") + ggtitle(Title) + scale_fill_manual(values=COLSE)
+      
+      p <- p + theme(axis.text.x = element_text(angle=90, hjust=0.5, vjust=0.5, size=8)) 
+      
+      p <- p + theme(axis.title.x = element_text(angle=0, size = 12, vjust = 1, hjust = 0.5))
+      
+      p <- p + theme(axis.title.y = element_text(size = 8))
+      
+      p <- p + geom_hline(yintercept=0)
+      
+      # print( p )
+      setwd("C:/Users/guof/Desktop/GEIDCO_paper_writing/figures")
+      ggsave( paste( ss ,"_SE_prod_", yy, "_", rr ,".jpeg", sep="" ) )
+    }
+  }
+}
+
+##-----------------------------------------------------------------------------------------
+## SSP2 demand plotting finished
+##-----------------------------------------------------------------------------------------
