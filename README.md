@@ -22,3 +22,7 @@ There is a 'variable' in the code.
 '''Java
 test <- c("Yes", "No")
 '''
+
+![world](http://picsum.photos/200/200)
+
+> Black Lives Matter
