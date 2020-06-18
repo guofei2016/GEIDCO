@@ -26,3 +26,12 @@ test <- c("Yes", "No")
 ![world](http://picsum.photos/200/200)
 
 > Black Lives Matter
+
+
+|name|age|nationality|
+|---|---|---|
+|wang|20|CHN|
+|Li|21|USA|
+
+
+This is a *good* **Friday** ~~Sunday~~.
