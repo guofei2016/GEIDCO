@@ -2,16 +2,11 @@
 for GEIDCO project related documents
 # Brackgroud
 ## UHV Line Plan
-~~old version~~
-_Task1
-_Task2
+
 just a test
 - first time
 - second time
-  - third time
-  1. 
-  2. 
-  3. 
+
 [BBC News](https://www.bbc.co.uk/)
 Things are getting better.
 Things are getting bad.
